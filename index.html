@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NISHIFY – Romantic Playlist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" /> <!-- [web:7] -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /> <!-- [web:6] -->
+
+  <style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #1b1b2f 0%, #151730 40%, #0c0c1c 100%);
+    color: #e0e0f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .wrapper {
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', cursive;
+    font-size: 3rem;
+    letter-spacing: 5px;
+    color: #f5a7a0;
+    text-shadow: 0 0 12px rgba(245, 167, 160, 0.65);
+  }
+
+  .tagline {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+
+  .tagline span {
+    color: #ffeca8;
+  }
+
+  .player-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(16px);
+    background: rgba(16, 16, 30, 0.9);
+    border: 1px solid rgba(100, 100, 140, 0.15);
+    padding: 14px 18px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  }
+
+  .player-cover {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background-size: cover;
+    background-position: center;
+    background-image: radial-gradient(circle, #f5a7a0 0%, #8a4f50 70%);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .player-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .player-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .player-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  .progress-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 14px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f5a7a0, #fcb69b);
+    border-radius: 999px;
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .control-btn {
+    border: none;
+    background: #f5a7a0;
+    color: #fff;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  }
+
+  .control-btn.small {
+    width: 36px;
+    height: 36px;
+    background: #fcb69b;
+  }
+
+  .control-btn:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 11px 26px rgba(0, 0, 0, 0.65);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background: rgba(18, 18, 36, 0.85);
+    border: 1px solid rgba(120, 120, 160, 0.12);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.75),
+                inset 0 1px 2px rgba(255, 255, 255, 0.04);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.06), transparent 55%);
+    pointer-events: none;
+  }
+
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(120deg, rgba(60, 10, 80, 0.06), rgba(150, 30, 80, 0.04), rgba(255, 150, 180, 0.02));
+    pointer-events: none;
+  }
+
+  .song-poster {
+    width: 100%;
+    border-radius: 14px;
+    height: 190px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  }
+
+  .song-poster::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(16, 16, 40, 0.7), transparent 55%);
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    z-index: 1;
+    color: #f5e8f0;
+  }
+
+  .card-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    z-index: 1;
+  }
+
+  .card-quote {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    margin-top: 5px;
+    z-index: 1;
+    opacity: 0.9;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    z-index: 1;
+  }
+
+  .pill {
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pill i {
+    color: #f5a7a0;
+    font-size: 0.9rem;
+  }
+
+  .play-icon {
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    border: none;
+    background: linear-gradient(135deg, #f5a7a0, #fcb69b);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 9px 20px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .play-icon:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 13px 28px rgba(0, 0, 0, 0.75);
+  }
+
+
+  .penguu {
+    margin: 24px 0 6px;
+    text-align: center;
+    font-family: 'Great Vibes', cursive;
+    font-size: 2.3rem;
+    color: #ffe8f5;
+    text-shadow: 0 0 16px rgba(255, 232, 245, 0.4),
+                 0 0 60px rgba(255, 167, 160, 0.3);
+  }
+
+  .penguu span {
+    color: #f5a7a0;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    max-width: 720px;
+    margin: 8px auto 0;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    .logo {
+      font-size: 2.3rem;
+    }
+    .player-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .player-cover {
+      margin: 0 auto;
+    }
+    .player-controls {
+      justify-content: center;
+    }
+    .footer-note {
+      font-size: 0.85rem;
+      padding: 0 10px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div class="logo">NISHIFY</div>
+      <p class="tagline">
+        A quiet universe of sunflower skies, red evenings, chai warmth and penguin hugs – pressed into these songs, for my forever <span>doctor of hearts</span>.
+      </p>
+    </header>
+
+    <!-- Global Player Bar -->
+    <div class="player-bar">
+      <div class="player-cover" id="playerCover"></div>
+      <div class="player-info">
+        <div class="player-title" id="playerTitle">Click any song to start our story...</div>
+        <div class="player-subtitle" id="playerSubtitle">Love, sun, chai, brownies, swimming and us.</div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="time-row">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="player-controls">
+        <button class="control-btn small" id="prevBtn">
+          <i class="fa fa-step-backward"></i>
+        </button>
+        <button class="control-btn" id="playPauseBtn">
+          <i class="fa fa-play" id="playPauseIcon"></i>
+        </button>
+        <button class="control-btn small" id="nextBtn">
+          <i class="fa fa-step-forward"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Song Cards -->
+    <div class="grid" id="songGrid">
+      <!-- Cards will be injected by JS -->
+    </div>
+
+    <div class="penguu">
+      I Love <span>Penguuuuu</span> – today, tomorrow, every sunrise.
+    </div>
+    <p class="footer-note">
+      You are my sunflower in the rain, my sun after long nights, my chai in winter, my favourite brownie on sad days, my red heartbeat, my thepla smile and makhana midnight laughter – my one and only doctor who still heals me without a stethoscope.
+    </p>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <script>
+    const songs = [
+      {
+        title: "Hum Tere Pyaar Mein",
+        file: "Ham Tere Pyaar Main.mp3",
+        mood: "Sunflower Promise",
+        poster: "https://images.pexels.com/photos/459335/pexels-photo-459335.jpeg",
+        quote: "Hum tere pyaar mein itne kho gaye hain ki har subah ka pehla sunflower teri muskaan ban gaya – na garlic, na onion, sirf chai ki khushboo aur tera naam."
+      },
+      {
+        title: "Bairan",
+        file: "Bairan Banjaare (pagalall.com).mp3",
+        mood: "Soft Pain",
+        poster: "https://images.pexels.com/photos/556669/pexels-photo-556669.jpeg",
+        quote: "Kabhi kabhi duniya bairan lagti hai, par jab tu mujhe red sweater mein dekh ke halki si smile karti hai, saari dushmani pighal ke brownie jaise meethi ho jaati hai."
+      },
+      {
+        title: "Hai Unki Woh Nigahein",
+        file: "Hai Unki Woh Nigahein - Asha Bhosle - AAKHRI DAO - Shekhar, Nutan (1).mp3",
+        mood: "Eyes & Silence",
+        poster: "https://images.pexels.com/photos/556663/pexels-photo-556663.jpeg",
+        quote: "Un nigaahon mein aisa chain hai jaise swimming pool ke neeche se dikhte hue suraj ki kirnein – halka sa darr, bohot sa sukoon, aur beinteha pyaar."
+      },
+      {
+        title: "With You",
+        file: "With You - AP Dhillon.mp3",
+        mood: "Always Us",
+        poster: "https://images.pexels.com/photos/1028725/pexels-photo-1028725.jpeg",
+        quote: "With you, har thepla breakfast Sunday brunch ban jaata hai, har makhana movie night therapy – tu hi mera comfort, tu hi mera ghar, tu hi meri zindagi ka best decision."
+      },
+      {
+        title: "Khat",
+        file: "Khat Navjot Ahuja (pagalall.com).mp3",
+        mood: "Letters",
+        poster: "https://images.pexels.com/photos/2079438/pexels-photo-2079438.jpeg",
+        quote: "Agar dil ek khat hota, toh main har line mein likhta – tum garlic aur onion ke bina bhi meri favourite recipe ho, jis mein sirf pyaar, respect aur sunflower jaisi roshni hai."
+      },
+      {
+        title: "In Ankhon Ki Masti",
+        file: "In Aankhon Ki Masti(KoshalWorld.Com).mp3",
+        mood: "Nazm",
+        poster: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+        quote: "In ankhon ki masti ke maare hum aise doob gaye ki swimming bhi seekh li sirf tumhare saath pani mein sunsets dekhne ke liye."
+      },
+      {
+        title: "Khayaal",
+        file: "Khayaal Talwiinder 128 Kbps.mp3",
+        mood: "Thoughts of You",
+        poster: "https://images.pexels.com/photos/556688/pexels-photo-556688.jpeg",
+        quote: "Tera khayaal bhi chai ki tarah hai – jitna garam, utna hi sukoon dene wala; jitna der tak rahe, utna hi gehra ho jaata hai mera pyaar."
+      },
+      {
+        title: "Dil Ek Mandir",
+        file: "Dil Ek Mandir Hai - (Raag.Fm).mp3",
+        mood: "Devotion",
+        poster: "https://images.pexels.com/photos/1024975/pexels-photo-1024975.jpeg",
+        quote: "Mera dil ek mandir hai jahan bas do murtiyaan hain – ek tu sunflower ke phool ke saath, aur ek tu red dress mein, dono par likha hai: ‘Dr. Penguu – heart specialist’."
+      },
+      {
+        title: "Main Zindagi Ke Saath",
+        file: "Main Zindagi Ka Saath Nibhata Chala Gaya Hum Dono 320 Kbps.mp3",
+        mood: "Lifelong",
+        poster: "https://images.pexels.com/photos/1449655/pexels-photo-1449655.jpeg",
+        quote: "Main zindagi ke saath chalna chahta hoon, par sirf tab jab tere haath mein garam chai ka cup ho, doosre haath mein mera haath, aur saamne do penguins ki tarah humari chhoti si duniya."
+      },
+      {
+        title: "Tere Hawale",
+        file: "Tere Hawaale Laal Singh Chaddha 320 Kbps.mp3",
+        mood: "Surrender",
+        poster: "https://images.pexels.com/photos/573299/pexels-photo-573299.jpeg",
+        quote: "Dil, sapne, plans, sab tere hawale – tu doctor na ban payi, lekin mere liye tu har dard ka injection hai, jo sirf ek jhappi se sab kuch theek kar deti hai."
+      },
+      {
+        title: "Aise Kyun",
+        file: "Aise Kyun - Anurag Saikia (Mismatched) [128 Kbps]-(SongsPk.com.se).mp3",
+        mood: "Questions",
+        poster: "https://images.pexels.com/photos/556666/pexels-photo-556666.jpeg",
+        quote: "Aise kyun lagta hai ki jab bhi tu naraz hoti hai, poora universe thoda feeka ho jaata hai – shayad isliye kyunki meri zindagi ka sabse bright color sirf tera red hai."
+      },
+      {
+        title: "Ishq Hai",
+        file: "Ishq Hai(KoshalWorld.Com).mp3",
+        mood: "Pure Love",
+        poster: "https://images.pexels.com/photos/169319/pexels-photo-169319.jpeg",
+        quote: "Ishq hai woh feeling jo brownie ke pehle bite jaisi hai – pehle surprise, phir silence, phir bas ek hi khayal: ‘kaash yeh moment kabhi khatam na ho, bilkul tere saath waise hi’."
+      },
+      {
+        title: "Kho Gaye",
+        file: "Kho Gaye (Mismatched 2) - (Raag.Fm).mp3",
+        mood: "Lost in Love",
+        poster: "https://images.pexels.com/photos/808593/pexels-photo-808593.jpeg",
+        quote: "Hum dono kho gaye the ek sham swimming pool ke paas, jab tumne bas itna kaha tha – ‘chai ke baad thoda walk karenge?’ tabse har walk sirf tumhare saath hi soch sakta hoon."
+      },
+      {
+        title: "Ek Baar Dekh Lijiye",
+        file: "Ek Baar Dekh Lijiye - Sanjay Leela Bhansali, Kalpana Gandharva(MpThree.in).mp3",
+        mood: "One More Look",
+        poster: "https://images.pexels.com/photos/2078266/pexels-photo-2078266.jpeg",
+        quote: "Bas ek baar dekh lijiye mujhe us nazar se jisme suraj ke saath sunflower bhi chamak rahe ho – main har roz wohi nazar jeene ke liye wapas aa jaunga."
+      },
+      {
+        title: "Aayat",
+        file: "Aayat Bajirao Mastani 320 Kbps.mp3",
+        mood: "Sacred Love",
+        poster: "https://images.pexels.com/photos/556668/pexels-photo-556668.jpeg",
+        quote: "Tu meri zindagi ki woh aayat hai jisme likha hai – ‘garlic aur onion ke bina bhi life tasty ho sakti hai, bas saath mein ek sundar si ladki ho jo doctor na hoke bhi dil ko ilaaj de’."
+      },
+      {
+        title: "Lal Ishq",
+        file: "Laal Ishq Goliyon Ki Raasleela Ram Leela 320 Kbps.mp3",
+        mood: "Red Love",
+        poster: "https://images.pexels.com/photos/1028440/pexels-photo-1028440.jpeg",
+        quote: "Tera lal ishq us red dress jaisa hai jo tujhe khud se bhi zyada suit karta hai – main har janam mein sirf itna maangunga, tu rahe, tera red rahe, aur humari chai thandi na ho."
+      },
+      {
+        title: "Tu Kisi Rail Se",
+        file: "Tu Kisi Rail Si  Masaan  Vicky Kaushal & Shweta Tripathi  Swanand Kirkire  Indian Ocean Lyrical.mp3",
+        mood: "Wanderlust",
+        poster: "https://images.pexels.com/photos/21014/pexels-photo.jpg",
+        quote: "Tu kisi rail se guzarti hawa jaisi hai, main platform pe khada woh aadmi jo har baar tujhe dekh ke sochta hai – kaash yeh train mere sheher, meri zindagi, mere ghar tak ruk jaye."
+      },
+      {
+        title: "O Rangrez",
+        file: "O Rangrez - Lyrcial Video  Bhaag Milkha Bhaag  Farhan, Sonam  Shreya Ghoshal, Javed Bashir.mp3",
+        mood: "Colors of Love",
+        poster: "https://images.pexels.com/photos/556694/pexels-photo-556694.jpeg",
+        quote: "O rangrez, tune meri dull si life ko sunflower yellow, sky blue, chai brown aur tere favourite red se aise rang diya ki ab main bina tere koi rang pehchan hi nahi pata."
+      },
+      {
+        title: "There For You",
+        file: "Martin Garrix & Troye Sivan - There For You (Official Video).mp3",
+        mood: "Always There",
+        poster: "https://images.pexels.com/photos/1024984/pexels-photo-1024984.jpeg",
+        quote: "I’ll always be there for you – jab anxiety aaye toh makhana le aunga, jab thakan aaye toh chai banaunga, jab aansu aaye toh bas yeh yaad dilaoonga: you are my favourite doctor, even if you never wore a white coat."
+      },
+      {
+        title: "Sang Hoon Tere",
+        file: "Sang Hoon Tere Jannat 2 Original Motion Picturetrack 320 Kbps.mp3",
+        mood: "Together",
+        poster: "https://images.pexels.com/photos/3656339/pexels-photo-3656339.jpeg",
+        quote: "Sang hoon tere, toh har sham penguin walk ban jaati hai – chhote chhote kadam, haath mein garam chai, dil mein ek hi awaaz: ‘I love Penguuuuu, forever and ever.’"
+      }
+    ];
+
+    const audio = document.getElementById("audio");
+    const songGrid = document.getElementById("songGrid");
+
+    const playerTitle = document.getElementById("playerTitle");
+    const playerSubtitle = document.getElementById("playerSubtitle");
+    const playerCover = document.getElementById("playerCover");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const playPauseIcon = document.getElementById("playPauseIcon");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const progressBar = document.getElementById("progressBar");
+    const progressFill = document.getElementById("progressFill");
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
+
+    let currentIndex = 0;
+    let isPlaying = false;
+
+    function renderCards() {
+      songGrid.innerHTML = "";
+      songs.forEach((song, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const poster = document.createElement("div");
+        poster.className = "song-poster";
+        poster.style.backgroundImage = `url('${song.poster}')`;
+
+        const title = document.createElement("div");
+        title.className = "card-title";
+        title.textContent = song.title;
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "card-subtitle";
+        subtitle.textContent = song.mood;
+
+        const quote = document.createElement("div");
+        quote.className = "card-quote";
+        quote.textContent = song.quote;
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.innerHTML = `<i class="fa fa-sun-o"></i><span>Sun • Chai • Love</span>`;
+
+        const playButton = document.createElement("button");
+        playButton.className = "play-icon";
+        playButton.innerHTML = `<i class="fa fa-play"></i> Play`;
+        playButton.addEventListener("click", () => {
+          loadSong(index);
+          playSong();
+        });
+
+        footer.appendChild(pill);
+        footer.appendChild(playButton);
+
+        card.appendChild(poster);
+        card.appendChild(title);
+        card.appendChild(subtitle);
+        card.appendChild(quote);
+        card.appendChild(footer);
+
+        songGrid.appendChild(card);
+      });
+    }
+
+    function loadSong(index) {
+      currentIndex = index;
+      const song = songs[index];
+      audio.src = song.file;
+      playerTitle.textContent = song.title;
+      playerSubtitle.textContent = song.mood + " • For my sunflower soul, my doctor of hearts.";
+      playerCover.style.backgroundImage = `url('${song.poster}')`;
+    }
+
+    function playSong() {
+      audio.play();
+      isPlaying = true;
+      playPauseIcon.classList.remove("fa-play");
+      playPauseIcon.classList.add("fa-pause");
+    }
+
+    function pauseSong() {
+      audio.pause();
+      isPlaying = false;
+      playPauseIcon.classList.remove("fa-pause");
+      playPauseIcon.classList.add("fa-play");
+    }
+
+    playPauseBtn.addEventListener("click", () => {
+      if (!audio.src) {
+        loadSong(currentIndex);
+      }
+      if (isPlaying) {
+        pauseSong();
+      } else {
+        playSong();
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+      loadSong(currentIndex);
+      playSong();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % songs.length;
+      loadSong(currentIndex);
+      playSong();
+    });
+
+    audio.addEventListener("ended", () => {
+      currentIndex = (currentIndex + 1) % songs.length;
+      loadSong(currentIndex);
+      playSong();
+    });
+
+    function formatTime(sec) {
+      if (isNaN(sec)) return "0:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return m + ":" + (s < 10 ? "0" + s : s);
+    }
+
+    audio.addEventListener("timeupdate", () => {
+      const { currentTime, duration } = audio;
+      const percent = (currentTime / duration) * 100;
+      progressFill.style.width = (percent || 0) + "%";
+      currentTimeEl.textContent = formatTime(currentTime);
+      durationEl.textContent = formatTime(duration);
+    });
+
+    progressBar.addEventListener("click", (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const percent = offsetX / rect.width;
+      if (!isNaN(audio.duration)) {
+        audio.currentTime = percent * audio.duration;
+      }
+    });
+
+    renderCards();
+    loadSong(0);
+  </script>
+</body>
+</html>
